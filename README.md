@@ -17,7 +17,7 @@
 ---
 ## 🔥 Releases
 
-- [2025.04.11] We release the agent code and evaluation dataset. 
+- [2026.03.28] We release the agent code and evaluation dataset. 
 
 ## Introduction
 This repository hosts the project page and supporting materials for our work on resilient multimodal geospatial reasoning.
