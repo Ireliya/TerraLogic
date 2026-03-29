@@ -1,0 +1,7 @@
+*.pth
+*.pt
+*.ckpt
+*.7z
+*.zip
+*.tar
+*.gz

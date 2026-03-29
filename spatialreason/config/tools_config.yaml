@@ -1,0 +1,616 @@
+# Spatial Reasoning Tools Configuration
+# This file contains all tool metadata, parameters, and configuration values
+
+# Global default parameters
+defaults:
+  spatial:
+    buffer_distance_meters: 30.0
+  confidence_thresholds:
+    detection: 0.6
+    classification: 0.5
+    segmentation: 0.5
+  visualization:
+    alpha: 0.6
+    dpi: 150
+    font_size: 10
+  matching:
+    query_threshold: 0.3
+    primary_keyword_boost: 0.5
+    keyword_weight: 0.3
+    use_case_weight: 0.7
+  # Error handling and retry configuration
+  error_handling:
+    max_retry_attempts: 3
+    retry_backoff_factor: 2.0
+    retry_base_delay: 1.0
+    classification_timeout_seconds: 30
+    tool_execution_timeout_seconds: 60
+    top_k_detection_candidates: 3
+    enable_graceful_failure: true
+    skip_on_insufficient_classes: true
+  # Evaluation mode configuration
+  evaluation:
+    fail_on_no_plan: true
+    fail_on_no_steps: true
+    strict_json_validation: true
+    log_raw_planner_output: true
+    terminate_on_planner_failure: true
+
+# Class mappings from class_config.json - consolidated for all tools
+class_mappings:
+  buildings: ["Buildings", "House", "structures", "apartments", "warehouses", "hangars"]
+  water: ["Water", "Ocean", "ocean", "River", "canal", "pond", "ponds", "bodies"]
+  roads: ["Roads", "Pathways", "pathways", "runway", "Runway", "taxiways", "Taxiways"]
+  vegetation: ["Vegetation", "Trees", "Grass", "grass", "crops", "crop", "plantations", "forests"]
+  vehicles: ["Cars", "trucks", "semi-trucks", "buses", "van", "Vehicles", "vehicle", "SUVs"]
+  aircraft: ["Aircraft", "Fighter", "helicopter", "helicopters", "C-130"]
+  infrastructure: ["bridges", "towers", "pipes", "Pipes", "transformer", "transformers"]
+  sports: ["Basketball", "baseball", "Baseball", "Field", "courts", "volleyball", "hockey"]
+  parking: ["Parking", "garage", "garages"]
+  industrial: ["factories", "industrial", "storage", "containers", "container", "tanks", "tank"]
+
+# Tool registry - defines all available tools
+tools:
+  # Perception Tools (RemoteSAM-based)
+  segmentation:
+    tool_id: "segmentation"
+    name: "RemoteSAM Segmentation Tool"
+    description: "Segment objects in satellite imagery using text prompts for spatial analysis"
+    category: "perception"
+    keywords:
+      - "segment"
+      - "segmentation"
+      - "building"
+      - "objects"
+      - "identify"
+      - "buildings"
+      - "roads"
+      - "spatial"
+      - "analysis"
+    use_cases:
+      - "identify buildings and roads for spatial analysis"
+      - "segment buildings in urban areas"
+      - "segment water bodies and rivers"
+      - "segment vegetation and forests"
+      - "segment roads and infrastructure"
+      - "delineate object boundaries"
+      - "identify buildings within buffer zones"
+      - "spatial proximity analysis of buildings and roads"
+    parameters:
+      required:
+        - "image_path"
+        - "text_prompt"
+      optional:
+        - "meters_per_pixel"
+    parameter_schema:
+      image_path:
+        type: "string"
+        description: "Path to image file (PNG or JPG)"
+      text_prompt:
+        type: "string"
+        description: "Natural language description of objects to segment"
+      meters_per_pixel:
+        type: "number"
+        description: "Ground resolution in meters per pixel"
+        default: 0.3
+    default_prompts:
+      fallback: "buildings"
+      object_mappings:
+        building: "buildings"
+        structure: "buildings"
+        house: "buildings"
+        water: "water bodies"
+        river: "water bodies"
+        lake: "water bodies"
+        pond: "water bodies"
+        vegetation: "vegetation"
+        forest: "vegetation"
+        tree: "vegetation"
+        plant: "vegetation"
+        road: "roads"
+        highway: "roads"
+        street: "roads"
+        land_cover: "buildings, water, vegetation"
+        land_use: "buildings, water, vegetation"
+
+  detection:
+    tool_id: "detection"
+    name: "RemoteSAM Detection Tool"
+    description: "Detect and locate specific objects like aircraft, vehicles, and ships in satellite imagery"
+    category: "perception"
+    keywords:
+      - "detect"
+      - "detection"
+      - "locate"
+      - "find"
+      - "objects"
+      - "aircraft"
+      - "vehicle"
+      - "ship"
+      - "sports"
+      - "infrastructure"
+      - "oriented"
+      - "rotated"
+    use_cases:
+      - "detect aircraft (planes, helicopters)"
+      - "locate vehicles (cars, trucks)"
+      - "find ships and vessels"
+      - "identify sports facilities (courts, fields)"
+      - "detect infrastructure (bridges, harbors, storage tanks)"
+      - "count oriented objects in satellite imagery"
+    parameters:
+      required:
+        - "image_path"
+        - "text_prompt"
+      optional:
+        - "confidence_threshold"
+        - "meters_per_pixel"
+    parameter_schema:
+      image_path:
+        type: "string"
+        description: "Path to satellite image file (PNG or JPG)"
+      text_prompt:
+        type: "string"
+        description: "Natural language description of objects to detect (e.g., 'aircraft', 'vehicles', 'ships')"
+      confidence_threshold:
+        type: "number"
+        description: "Minimum confidence threshold (0.0-1.0)"
+        default: 0.6
+        min: 0.0
+        max: 1.0
+      meters_per_pixel:
+        type: "number"
+        description: "Ground resolution in meters per pixel for metadata"
+        default: 0.3
+    model_info:
+      architecture: "RemoteSAM"
+      model_file: "RemoteSAMv1.pth"
+      description: "Text-prompted object detection using RemoteSAM model"
+      supported_objects: ["buildings", "water", "roads", "vegetation", "vehicles", "aircraft", "infrastructure"]
+    default_prompts:
+      fallback: "objects"
+      object_mappings:
+        aircraft: "plane, helicopter"
+        airplane: "plane"
+        plane: "plane"
+        helicopter: "helicopter"
+        vehicle: "small-vehicle, large-vehicle"
+        car: "small-vehicle"
+        truck: "large-vehicle"
+        ship: "ship"
+        boat: "ship"
+        vessel: "ship"
+        building: "storage-tank"
+        tank: "storage-tank"
+        storage: "storage-tank"
+        sports: "baseball-diamond, tennis-court, basketball-court, soccer-ball-field"
+        court: "tennis-court, basketball-court"
+        field: "ground-track-field, soccer-ball-field"
+        bridge: "bridge"
+        roundabout: "roundabout"
+        harbor: "harbor"
+        port: "harbor"
+        pool: "swimming-pool"
+
+  classification:
+    tool_id: "classification"
+    name: "RemoteSAM Hierarchical Region Classification Tool"
+    description: "Perform hierarchical region-based classification mapping 25 remote sensing classes to 5 land use categories"
+    category: "perception"
+    keywords:
+      - "classify"
+      - "classification"
+      - "hierarchical"
+      - "regional"
+      - "land use"
+      - "remote sensing"
+      - "satellite"
+      - "aerial"
+    use_cases:
+      - "classify regions into Urban, Industrial, Transportation, Sports & Recreation, and Natural categories"
+      - "map objects (ship, storage tank, baseball diamond, tennis court, basketball court, ground track field, bridge, large vehicle, small vehicle, helicopter, swimming pool, roundabout, soccer ball field, plane, harbor, building, road, water, barren, forest, agriculture, impervious surfaces, low vegetation, tree, car) to hierarchical categories"
+      - "identify land use patterns and regional characteristics"
+      - "hierarchical land cover classification"
+      - "spatial region analysis"
+    parameters:
+      required:
+        - "image_path"
+        - "text_prompt"
+      optional:
+        - "confidence_threshold"
+        - "meters_per_pixel"
+    parameter_schema:
+      image_path:
+        type: "string"
+        description: "Path to satellite image file (PNG or JPG)"
+      text_prompt:
+        type: "string"
+        description: "Natural language description for context (tool maps 25 classes to 5 hierarchical categories)"
+      confidence_threshold:
+        type: "number"
+        description: "Minimum confidence threshold (0.0-1.0)"
+        default: 0.5
+        min: 0.0
+        max: 1.0
+      meters_per_pixel:
+        type: "number"
+        description: "Ground resolution in meters per pixel for metadata"
+        default: 0.3
+    model_info:
+      architecture: "RemoteSAM"
+      dataset: "Remote Sensing"
+      classes: ["ship", "storage tank", "baseball diamond", "tennis court", "basketball court", "ground track field", "bridge", "large vehicle", "small vehicle", "helicopter", "swimming pool", "roundabout", "soccer ball field", "plane", "harbor", "building", "road", "water", "barren", "forest", "agriculture", "impervious surfaces", "low vegetation", "tree", "car"]
+      hierarchical_categories: ["Urban", "Industrial", "Transportation", "Sports & Recreation", "Natural"]
+      model_type: "hierarchical_region_classification"
+    default_prompts:
+      fallback: "hierarchical region classification"
+      category_mappings:
+        urban: "Urban"
+        city: "Urban"
+        residential: "Urban"
+        industrial: "Industrial"
+        factory: "Industrial"
+        manufacturing: "Industrial"
+        transportation: "Transportation"
+        infrastructure: "Transportation"
+        traffic: "Transportation"
+        sports: "Sports & Recreation"
+        recreation: "Sports & Recreation"
+        athletic: "Sports & Recreation"
+        natural: "Natural"
+        environment: "Natural"
+        landscape: "Natural"
+        land_use: "Urban, Industrial, Transportation, Sports & Recreation, Natural"
+
+  # SAR Analysis Tools (SARATR-X-based)
+  sar_detection:
+    tool_id: "sar_detection"
+    name: "SAR Detection Tool"
+    description: "Detect objects in SAR imagery using SARATR-X foundation model"
+    category: "sar_analysis"
+    keywords:
+      - "sar"
+      - "radar"
+      - "detection"
+      - "synthetic aperture radar"
+      - "target"
+      - "vehicle"
+      - "ship"
+      - "aircraft"
+      - "building"
+    use_cases:
+      - "detect vehicles in SAR imagery"
+      - "identify ships in maritime SAR scenes"
+      - "locate aircraft in SAR airport scenes"
+      - "find buildings and structures in SAR urban areas"
+      - "military target detection in SAR images"
+      - "infrastructure monitoring with SAR data"
+    parameters:
+      required:
+        - "image_path"
+      optional:
+        - "confidence_threshold"
+        - "device"
+    parameter_schema:
+      image_path:
+        type: "string"
+        description: "Path to SAR image file (PNG, JPG, or TIFF)"
+      confidence_threshold:
+        type: "number"
+        description: "Detection confidence threshold (0.0-1.0)"
+        default: 0.3
+      device:
+        type: "string"
+        description: "CUDA device for inference"
+        default: "cuda:0"
+
+  sar_classification:
+    tool_id: "sar_classification"
+    name: "SAR Classification Tool"
+    description: "Classify objects and scenes in SAR imagery using SARATR-X foundation model"
+    category: "sar_analysis"
+    keywords:
+      - "sar"
+      - "radar"
+      - "classification"
+      - "synthetic aperture radar"
+      - "scene"
+      - "target"
+      - "recognition"
+      - "fine-grained"
+    use_cases:
+      - "classify SAR scenes (urban, rural, coastal, etc.)"
+      - "recognize specific vehicle types in SAR images"
+      - "identify ship categories in maritime SAR"
+      - "fine-grained aircraft classification in SAR"
+      - "terrain and land cover classification from SAR"
+      - "military target recognition and classification"
+    parameters:
+      required:
+        - "image_path"
+      optional:
+        - "classification_type"
+        - "confidence_threshold"
+        - "device"
+    parameter_schema:
+      image_path:
+        type: "string"
+        description: "Path to SAR image file (PNG, JPG, or TIFF)"
+      classification_type:
+        type: "string"
+        description: "Type of classification: 'scene', 'target', or 'fine_grained'"
+        default: "scene"
+      confidence_threshold:
+        type: "number"
+        description: "Classification confidence threshold (0.0-1.0)"
+        default: 0.5
+      device:
+        type: "string"
+        description: "CUDA device for inference"
+        default: "cuda:0"
+    default_prompts:
+      fallback: "scene"
+      classification_mappings:
+        scene: "scene"
+        target: "target"
+        fine_grained: "fine_grained"
+        vehicle: "target"
+        ship: "target"
+        aircraft: "target"
+        building: "target"
+        terrain: "scene"
+        land_cover: "scene"
+
+  # Spatial Relations Tools
+  buffer:
+    tool_id: "buffer"
+    name: "Buffer Tool"
+    description: "Create buffer zones around geometries"
+    category: "spatial_relations"
+    keywords:
+      - "buffer"
+      - "zone"
+      - "proximity"
+      - "distance"
+    use_cases:
+      - "create buffer zones around water bodies"
+      - "analyze proximity to infrastructure"
+      - "flood risk zone creation"
+    parameters:
+      required:
+        - "buffer_distance_meters"
+        - "image_path"
+      optional:
+        - "meters_per_pixel"
+        - "query_text"
+    parameter_schema:
+      buffer_distance_meters:
+        type: "number"
+        description: "Buffer distance in meters"
+      image_path:
+        type: "string"
+        description: "Path to input satellite image"
+      meters_per_pixel:
+        type: "number"
+        description: "Ground resolution in meters per pixel"
+      query_text:
+        type: "string"
+        description: "Query text for role assignment"
+        description: "Ground resolution in meters per pixel"
+        default: 0.3
+      geometry_type:
+        type: "string"
+        description: "Type of input geometry: 'points', 'polygons', or 'bboxes'"
+        default: "points"
+
+  distance_calculation:
+    tool_id: "distance_calculation"
+    name: "Distance Calculation Tool"
+    description: "Calculate distances between geometries"
+    category: "spatial_statistics"
+    keywords:
+      - "distance"
+      - "measure"
+      - "proximity"
+      - "separation"
+    use_cases:
+      - "measure distance between buildings and water"
+      - "calculate proximity to infrastructure"
+      - "spatial relationship analysis"
+    parameters:
+      required:
+        - "geometry_set_1"
+        - "geometry_set_2"
+      optional:
+        - "measurement_unit"
+        - "image_path"
+        - "meters_per_pixel"
+        - "geometry_type_1"
+        - "geometry_type_2"
+    parameter_schema:
+      geometry_set_1:
+        type: "array"
+        description: "First set of geometries"
+      geometry_set_2:
+        type: "array"
+        description: "Second set of geometries"
+      measurement_unit:
+        type: "string"
+        description: "Unit of measurement"
+        default: "meters"
+      image_path:
+        type: "string"
+        description: "Path to input satellite image"
+      meters_per_pixel:
+        type: "number"
+        description: "Ground resolution in meters per pixel"
+        default: 0.3
+      geometry_type_1:
+        type: "string"
+        description: "Type of first geometry set"
+        default: "points"
+      geometry_type_2:
+        type: "string"
+        description: "Type of second geometry set"
+        default: "points"
+
+  overlap:
+    tool_id: "overlap"
+    name: "Overlap Tool"
+    description: "Calculate overlap ratios between geometries"
+    category: "spatial_relations"
+    keywords:
+      - "overlap"
+      - "intersection"
+      - "ratio"
+      - "coverage"
+    use_cases:
+      - "calculate building overlap with flood zones"
+      - "analyze land use overlap"
+      - "intersection analysis"
+    parameters:
+      required:
+        - "geometry_set_1"
+        - "geometry_set_2"
+      optional:
+        - "image_path"
+        - "meters_per_pixel"
+    parameter_schema:
+      geometry_set_1:
+        type: "array"
+        description: "First set of geometries"
+      geometry_set_2:
+        type: "array"
+        description: "Second set of geometries"
+      image_path:
+        type: "string"
+        description: "Path to input satellite image"
+      meters_per_pixel:
+        type: "number"
+        description: "Ground resolution in meters per pixel"
+        default: 0.3
+
+  containment:
+    tool_id: "containment"
+    name: "Containment Tool"
+    description: "Analyze containment relationships between geometries"
+    category: "spatial_relations"
+    keywords:
+      - "containment"
+      - "within"
+      - "inside"
+      - "boundary"
+    use_cases:
+      - "check if buildings are within flood zones"
+      - "analyze objects within boundaries"
+      - "spatial containment analysis"
+    parameters:
+      required:
+        - "container_geometries"
+        - "contained_geometries"
+      optional:
+        - "image_path"
+        - "meters_per_pixel"
+    parameter_schema:
+      container_geometries:
+        type: "array"
+        description: "Container geometries"
+      contained_geometries:
+        type: "array"
+        description: "Geometries to check for containment"
+      image_path:
+        type: "string"
+        description: "Path to input satellite image"
+      meters_per_pixel:
+        type: "number"
+        description: "Ground resolution in meters per pixel"
+
+  # Spatial Statistics Tools
+  area_measurement:
+    tool_id: "area_measurement"
+    name: "Area Measurement Tool"
+    description: "Measure areas of polygonal geometries"
+    category: "spatial_statistics"
+    keywords:
+      - "area"
+      - "measure"
+      - "size"
+      - "coverage"
+    use_cases:
+      - "measure building footprint areas"
+      - "calculate water body coverage"
+      - "land use area analysis"
+    parameters:
+      required:
+        - "polygons"
+        - "image_path"
+      optional:
+        - "meters_per_pixel"
+    parameter_schema:
+      polygons:
+        type: "array"
+        description: "List of polygon coordinates"
+      image_path:
+        type: "string"
+        description: "Path to input satellite image"
+      meters_per_pixel:
+        type: "number"
+        description: "Ground resolution in meters per pixel"
+
+
+
+  object_count_aoi:
+    tool_id: "object_count_aoi"
+    name: "Object Count in AOI Tool"
+    description: "Count objects within areas of interest"
+    category: "spatial_statistics"
+    keywords:
+      - "count"
+      - "objects"
+      - "aoi"
+      - "statistics"
+    use_cases:
+      - "count buildings in flood zones"
+      - "count objects within boundaries"
+      - "spatial object statistics"
+    parameters:
+      required:
+        - "object_geometries"
+        - "aoi_geometries"
+        - "image_path"
+      optional:
+        - "meters_per_pixel"
+    parameter_schema:
+      object_geometries:
+        type: "array"
+        description: "List of object geometries to count"
+      aoi_geometries:
+        type: "array"
+        description: "Areas of interest geometries"
+      image_path:
+        type: "string"
+        description: "Path to input satellite image"
+      meters_per_pixel:
+        type: "number"
+        description: "Ground resolution in meters per pixel"
+        default: 0.3
+
+
+
+# Environment variable mappings for overrides
+environment_overrides:
+  # Confidence thresholds
+  DETECTION_CONFIDENCE_THRESHOLD: "defaults.confidence_thresholds.detection"
+  CLASSIFICATION_CONFIDENCE_THRESHOLD: "defaults.confidence_thresholds.classification"
+  SEGMENTATION_CONFIDENCE_THRESHOLD: "defaults.confidence_thresholds.segmentation"
+
+  # Spatial parameters
+  DEFAULT_BUFFER_DISTANCE: "defaults.spatial.buffer_distance_meters"
+
+  # Matching parameters
+  QUERY_MATCH_THRESHOLD: "defaults.matching.query_threshold"
+
+  # Visualization parameters
+  VIZ_ALPHA: "defaults.visualization.alpha"
+  VIZ_DPI: "defaults.visualization.dpi"
+  VIZ_FONT_SIZE: "defaults.visualization.font_size"
