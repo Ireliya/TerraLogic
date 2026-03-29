@@ -53,5 +53,12 @@ Representative examples illustrating multi-step reasoning, tool execution, and a
 
 
 ---
+## 🙏 Acknowledgement
 
+We sincerely thank the authors of the following open-source projects for their valuable contributions, which support the tool ecosystem of our agent:
+
+- [SARATR-X](https://github.com/waterdisappear/SARATR-X)  
+- [RemoteSAM](https://github.com/1e12Leon/RemoteSAM)  
+- [Change3D](https://github.com/zhuduowang/Change3D)  
+- [DMIST](https://github.com/UESTC-nnLab/DMIST)
 
