@@ -1,5 +1,4 @@
-# Resilient Multimodal Geospatial Reasoning with Tool-Augmented Remote Sensing Agents
-
+# TerraLogic: A Benchmark for Hierarchical Geospatial Reasoning in Earth Observation
 <p align="center">
   <a href="https://github.com/Ireliya/Resilient-Multimodal-Geospatial-Reasoning-with-Tool-Augmented-Remote-Sensing-Agents">Project</a> •
 </p>
