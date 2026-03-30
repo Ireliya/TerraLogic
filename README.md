@@ -18,7 +18,7 @@
 ## 🔥 Releases
 
 - [2026.03.28] We release the agent code and evaluation dataset. 
-
+[![🤗 HuggingFace Dataset](https://img.shields.io/badge/HuggingFace-Dataset-yellow?logo=huggingface&style=for-the-badge)](https://huggingface.co/datasets/Ireliya/hierarchical-geospatial-reasoning)
 ## Introduction
 This repository hosts the project page and supporting materials for our work on resilient multimodal geospatial reasoning.
 with **tool-augmented remote sensing agents**. The agent is designed to support **verifiable, multi-step geospatial workflows**
